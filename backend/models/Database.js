@@ -1,20 +1,22 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env'})
 
-const mysql2 = require('mysql2')
+const mysql = require('mysql2')
 
 class Database {
-
+  #table
+  #conn
+  
   /**
    * for instance property table 
    * @param {String} table
    */
   constructor(table) {
     this.#table = table
-    this.#conn = mysql2.createPool({
+    this.#conn = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE
+      password: '',
+      database: process.env.DB_NAME
     })
   }
 
@@ -24,21 +26,14 @@ class Database {
    * @param {function} callback 
    */
   getData(by = null, callback) {
-    query = (by !== null) ?
-      'SELECT * FROM ??' : 'SELECT * FROM ?? WHERE ?? = ?'
+    let query = (by === null) ?
+      mysql.format('SELECT * FROM ??', [this.#table]) :
+      mysql.format('SELECT * FROM ?? WHERE ?? = ?', [this.#table, by.key, by.value])
 
-    if (by === null)  
-      this.#conn.execute(query, [this.#table],
-        (err, result) => {
-          if (err) throw err
-          callback(result)
-        })
-    else
-      this.#conn.execute(query, [this.#table, by.key, by.value],
-        (err, result) => {
-          if (err) throw err
-          callback(result)
-        })
+    this.#conn.execute(query, (err, result) => {
+        if (err) throw err
+        callback(result)
+      })
   }
 
   /**
