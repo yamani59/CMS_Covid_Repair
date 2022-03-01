@@ -1,8 +1,13 @@
 const Controller = require('./Controller')
 
+const UserController = new Controller('User')
+const NewsController = new Controller('News')
+const CategoryController = new Controller('Category')
+const SlideContoller = new Controller('Slide')
+
 module.exports = {
-  UserController: new Controller('User'),
-  NewsController: new Controller('News'),
-  CategoryController: new Controller('Category'),
-  Slide: new Controller('Slide')
+  UserController,
+  NewsController,
+  CategoryController,
+  SlideContoller
 }

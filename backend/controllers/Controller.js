@@ -1,11 +1,9 @@
 const Database = require('../models')
-const express = require('express').Router()
-
-class Controller {
+export default class Controller {
   #model
 
   constructor(model) {
-    this.model = model
+    this.#model = model
   }
 
   model() {
@@ -36,11 +34,12 @@ class Controller {
 
   getData(req, res) {
     try {
-      this.model().getData(req.params, (data) => {
-        res.status(200).json(data)
+      this.model().getData(null, (data) => {
+        res.status(200).json(data).end()
       })
     } catch (err) {
-      res.status(422).json({ msg: 'connot be proceed' })
+      console.log(err)
+      res.status(422).json({ msg: 'connot be proceed' }).end()
     }
   }
 
@@ -56,5 +55,3 @@ class Controller {
     }
   }
 }
-
-module.exports = Controller
