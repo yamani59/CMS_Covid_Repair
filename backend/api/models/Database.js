@@ -1,11 +1,19 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env'})
 
+<<<<<<< HEAD:backend/api/models/Database.js
 const mysql = require('mysql')
+=======
+const mysql = require('mysql2')
+>>>>>>> b2ec764526e1d0c54dd5a0b06531f8adbdc7f7e2:backend/models/Database.js
 
 class Database {
   #table
   #conn
+<<<<<<< HEAD:backend/api/models/Database.js
 
+=======
+  
+>>>>>>> b2ec764526e1d0c54dd5a0b06531f8adbdc7f7e2:backend/models/Database.js
   /**
    * for instance property table 
    * @param {String} table
@@ -15,8 +23,8 @@ class Database {
     this.#conn = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE
+      password: '',
+      database: process.env.DB_NAME
     })
   }
 
@@ -26,6 +34,7 @@ class Database {
    * @param {function} callback 
    */
   getData(by = null, callback) {
+<<<<<<< HEAD:backend/api/models/Database.js
     let query = (by !== null) ?
       this.#conn.format('SELECT * FROM ??', [this.#table]) :
       this.#conn.format('SELECT * FROM ?? WHERE ?? = ?', [this.#table, by.key, by.value])
@@ -34,6 +43,16 @@ class Database {
       if (err) throw err
       callback(result)
     })
+=======
+    let query = (by === null) ?
+      mysql.format('SELECT * FROM ??', [this.#table]) :
+      mysql.format('SELECT * FROM ?? WHERE ?? = ?', [this.#table, by.key, by.value])
+
+    this.#conn.execute(query, (err, result) => {
+        if (err) throw err
+        callback(result)
+      })
+>>>>>>> b2ec764526e1d0c54dd5a0b06531f8adbdc7f7e2:backend/models/Database.js
   }
 
   /**
