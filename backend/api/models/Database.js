@@ -1,8 +1,10 @@
 require('dotenv').config()
 
-const mysql2 = require('mysql2')
+const mysql = require('mysql')
 
 class Database {
+  #table
+  #conn
 
   /**
    * for instance property table 
@@ -10,7 +12,7 @@ class Database {
    */
   constructor(table) {
     this.#table = table
-    this.#conn = mysql2.createPool({
+    this.#conn = mysql.createPool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -24,21 +26,14 @@ class Database {
    * @param {function} callback 
    */
   getData(by = null, callback) {
-    query = (by !== null) ?
-      'SELECT * FROM ??' : 'SELECT * FROM ?? WHERE ?? = ?'
-
-    if (by === null)  
-      this.#conn.execute(query, [this.#table],
-        (err, result) => {
-          if (err) throw err
-          callback(result)
-        })
-    else
-      this.#conn.execute(query, [this.#table, by.key, by.value],
-        (err, result) => {
-          if (err) throw err
-          callback(result)
-        })
+    let query = (by !== null) ?
+      this.#conn.format('SELECT * FROM ??', [this.#table]) :
+      this.#conn.format('SELECT * FROM ?? WHERE ?? = ?', [this.#table, by.key, by.value])
+    
+    this.#conn.execute(query, (err, result) => {
+      if (err) throw err
+      callback(result)
+    })
   }
 
   /**
@@ -50,7 +45,8 @@ class Database {
     this.#conn.execute(
       `
       INSERT INTO ?? SET ?
-      `, [this.#table, data], (err, result) => {
+      `, [this.#table, data],
+      (err, result) => {
         if (err) throw err
         callback(result.changedRows)
       }
