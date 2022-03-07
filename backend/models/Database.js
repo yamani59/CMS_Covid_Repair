@@ -43,10 +43,9 @@ class Database {
    * @param {Function} callback 
    */
   insertData(data, callback) {
-    this.#conn.execute(
-      `
-      INSERT INTO ?? SET ?
-      `, [this.#table, data],
+    console.log(data)
+    const query = mysql.format('INSERT INTO ?? SET ?', [this.#table, data])
+    this.#conn.execute(query, [this.#table, data],
       (err, result) => {
         if (err) throw err
         callback(result.changedRows)
@@ -61,10 +60,10 @@ class Database {
    * @param {Function} callback 
    */
   updateData(data, compared, callback) {
-    this.#conn.execute(
-      `
-      UPDATE ?? SET ? WHERE ?? = ?
-      `,[this.#table, data, compared.key, compared.value],
+    const query = mysql.format('UPDATE ?? SET ? WHERE ?? = ?', 
+                      [this.#table, data, compared.by, compared.value])
+                      
+    this.#conn.execute(query,[this.#table, data, compared.key, compared.value],
       (err, result) => {
         if (err) throw err
         callback(result.changedRows)

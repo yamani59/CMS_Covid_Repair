@@ -1,18 +1,24 @@
 const Database = require('../models')
 const formidable = require('formidable')
 const path = require('path')
-const fs = require('fs')
+const mv = require('mv')
 let pathSave = path.join(__dirname, '../dist/')
 const form = formidable({ 
   multiples: true,
-  filter: (name, originalFilename, mimetype) => {
-    return mimetype && mimetype.includes('image')
-  }
+  // filter: (name, originalFilename, mimetype) => {
+  //   return mimetype && mimetype.includes('image')
+  // }
 })
 
 class Controller {
   constructor(model) {
     this.database = model
+  }
+
+  checkExtensi(arrayString, extensi) {
+    const ext = arrayString.split('/')[1]
+    if (!extensi.includes(ext)) return false
+    return ext
   }
 
   model() {
@@ -28,12 +34,15 @@ class Controller {
         
         if (files.image === undefined)
           res.status(422).json({ msg: 'connot be proceed' }).end()
+
+        const ext = this.checkExtensi(files.image.mimetype, ['jpg', 'png', 'jpeg'])
+        if (ext === false) throw new Error('failed file')
         
-        const fileName = files.image.newFilename
-        const pathNow = files.image.filepath + '.' + files.image.mimetype.split('/')[1]
+        const fileName = files.image.newFilename + '.' + ext
+        const pathNow = files.image.filepath
         pathSave = pathSave + fileName
 
-        fs.rename(pathNow, pathSave, (err) => {
+        mv(pathNow, pathSave, (err) => {
           if (err) throw err
 
           fields.image = fileName
