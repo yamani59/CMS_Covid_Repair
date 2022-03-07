@@ -1,6 +1,6 @@
-require('dotenv').config({ path: '../.env'})
-
+const path = require('path')
 const mysql = require('mysql2')
+require('dotenv').config({ path: path.join(__dirname, '../.env')})
 
 class Database {
   #table
@@ -10,6 +10,8 @@ class Database {
    * @param {String} table
    */
   constructor(table) {
+    console.log('hai')
+    console.log(process.env.DB_NAME)
     this.#table = table
     this.#conn = mysql.createPool({
       host: process.env.DB_HOST,
