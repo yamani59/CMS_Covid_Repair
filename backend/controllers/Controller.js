@@ -49,7 +49,6 @@ class Controller {
             res.status(200).json({ msg : 'new added successfully' }).end()
           })
         })
-        res.json(files)
       })
     } catch (err) {
       res.status(422).json({ msg: 'connot be proceed' }).end()

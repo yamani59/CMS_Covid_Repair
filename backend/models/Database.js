@@ -12,8 +12,6 @@ class Database {
    * @param {String} table
    */
   constructor(table) {
-    console.log('hai')
-    console.log(process.env.DB_NAME)
     this.#table = table
     this.#conn = mysql.createPool({
       host: process.env.DB_HOST,
@@ -37,8 +35,10 @@ class Database {
         if (err) throw err
 
         const urlImage = path.join(__dirname, '../dist/')
+        console.log(urlImage)
         if (result[0].image) {
           result.map(index => {
+            console.log('a')
             index.image = urlImage + index.image
           })
         } 
