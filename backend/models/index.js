@@ -8,7 +8,7 @@ class User extends Database {
 
 class News extends Database {
   constructor() {
-    super('new')
+    super('news')
   }
 }
 

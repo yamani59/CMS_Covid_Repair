@@ -35,13 +35,12 @@ class Database {
         if (err) throw err
 
         const urlImage = path.join(__dirname, '../dist/')
-        console.log(urlImage)
-        if (result[0].image) {
+        if (result.length != 0 && result[0].image !== undefined) {
           result.map(index => {
-            console.log('a')
             index.image = urlImage + index.image
           })
         } 
+
         callback(result)
       })
   }

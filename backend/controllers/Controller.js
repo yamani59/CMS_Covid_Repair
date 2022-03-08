@@ -31,9 +31,12 @@ class Controller {
         if (err) throw err
         
         if (files.image === undefined)
-          res.status(422).json({ msg: 'connot be proceed' }).end()
+          this.model().insertData(fields, (data) => {
+            if (data == 0) throw new Error('cannot insert')
+            res.status(200).json({ msg : 'new added successfully' }).end()
+          })
 
-        const ext = this.checkExtensi(files.image.mimetype, ['jpg', 'png', 'jpeg'])
+        const ext = this.checkExtensi(files.image .mimetype, ['jpg', 'png', 'jpeg'])
         if (ext === false) throw new Error('failed file')
         
         const fileName = files.image.newFilename + '.' + ext
@@ -59,7 +62,9 @@ class Controller {
     try {
       form.parse(req, (err, fields, files) => {
         if (err) throw err
-        if (files.image) {
+
+        const compared = { by: 'id', value: req.params.id }
+        if (files.image !== undefined ) {
           const ext = this.checkExtensi(files.image.mimetype, ['jpg', 'png', 'jpeg'])
           if (ext === false) throw new Error('failed file')
           
@@ -71,13 +76,18 @@ class Controller {
             if (err) throw err
 
             fields.image = fileName
-            const compared = { id: 'id', value: fields.id }
             this.model().updateData(fields, compared, (change) => {
               if (change == 0) throw new Error('cannot updateData')
               res.status(200).json({ msg: 'updated successfully' }).end()
             })
           })
         }
+
+
+        this.model().updateData(fields, compared, (change) => {
+          if (change == 0) throw new Error('cannot updateData')
+          res.status(200).json({ msg: 'updated successfully' }).end()
+        })
 
       })
     } catch (err) {
@@ -88,7 +98,6 @@ class Controller {
   getData(req, res) {
     this.model = this.model.bind(this)
     try {
-      console.log(this)
       this.model().getData(null, (data) => {
         res.status(200).json(data).end()
       })
