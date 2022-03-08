@@ -48,7 +48,7 @@ class Controller {
           fields.image = fileName
           this.model().insertData(fields, (data) => {
             if (data > 0) throw new Error('cannot insert')
-            res.status(200).json('new added successfully').end()
+            res.status(200).json({ msg: 'new added successfully' }).end()
           })
         })
         res.json(files)
@@ -73,15 +73,14 @@ class Controller {
             fields.image = fileName
             this.model().insertData(fields, (data) => {
               if (data > 0) throw new Error('cannot insert')
-              res.status(200).json('new added successfully').end()
+              res.status(200).json({ msg: `${this.database} updated successfully` })
             })
           })
         }
-
-      })
-      this.model().updateData(res.body, (data) => {
-        if (data === 0) throw new Error('cannot be proceed')
-        res.status(200).json({ msg: `${this.database} updated successfully` })
+        this.model().insertData(fields, (data) => {
+          if (data > 0) throw new Error('cannot insert')
+          res.status(200).json({ msg: `${this.database} updated successfully` })
+        })
       })
     } catch (err) {
       res.status(422).json({ msg: 'connot be proceed' })

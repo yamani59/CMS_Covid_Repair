@@ -2,6 +2,7 @@ require('dotenv')
 const jwt = require('jsonwebtoken')
 const { User, AccessToken } = require('../models')
 const UserModel = new User()
+const bcrypt = require('bcrypt')
 const AccessTokenModel = new AccessToken()
 
 const express = require('express').Router()
@@ -14,15 +15,20 @@ module.exports = {
     return jwt.sign(username, process.env.SECRET_TOKEN, { expiresIn: '1h' })
   },
   
-  authenticate: (req, res, next) => {
-    const { username, password } = req.body
-    const compared = { key: 'username', value: username }
+  dekripsi: async (data, encrypt) => { 
+    return await bcrypt.compare(data, encrypt)
+  },
 
+  authenticate: (req, res, next) => {
     try {
+      const { username, password } = req.body
+      const compared = { key: 'username', value: username }
+  
       UserModel.getData(compared, (data) => {
-        if (data[0].username !== username || data[0].password !== password)
-          throw new Error('Invalid')
-        const token = createToken(username)
+        if ( !this.dekripsi(data[0].password, password) && data[0].username !== username )
+          throw new Error('Authentication failed')
+
+        const token = this.createToken(username)
         const dataSend = {
           user_id: data[0].id,
           acces_token: token
@@ -59,3 +65,4 @@ module.exports = {
     })
   }
 }
+ 

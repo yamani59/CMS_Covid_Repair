@@ -1,5 +1,7 @@
 const path = require('path')
 const mysql = require('mysql2')
+const bcrypt = require('bcrypt')
+const htmlspecialchar = require('htmlspecialchars')
 require('dotenv').config({ path: path.join(__dirname, '../.env')})
 
 class Database {
@@ -31,8 +33,15 @@ class Database {
       mysql.format('SELECT * FROM ??', [this.#table]) :
       mysql.format('SELECT * FROM ?? WHERE ?? = ?', [this.#table, by.key, by.value])
 
-    this.#conn.execute(query, (err, result) => {
+    this.#conn.execute( query , (err, result) => {
         if (err) throw err
+
+        const urlImage = path.join(__dirname, '../dist/')
+        if (result[0].image) {
+          result.map(index => {
+            index.image = urlImage + index.image
+          })
+        } 
         callback(result)
       })
   }
@@ -43,10 +52,15 @@ class Database {
    * @param {Function} callback 
    */
   insertData(data, callback) {
-    console.log(data)
+    for (let key in data) {
+      data[key] = htmlspecialchar(data[key])
+    }
+
+    if (data.password) 
+      data.password = bcrypt.hashSync(data.password, 10)
+
     const query = mysql.format('INSERT INTO ?? SET ?', [this.#table, data])
-    this.#conn.execute(query, [this.#table, data],
-      (err, result) => {
+    this.#conn.execute( query , (err, result) => {
         if (err) throw err
         callback(result.changedRows)
       }
@@ -60,11 +74,17 @@ class Database {
    * @param {Function} callback 
    */
   updateData(data, compared, callback) {
+    for (let key in data) {
+      data[key] = htmlspecialchar(data[key])
+    }
+
+    if (data.password) 
+      data.password = bcrypt.hashSync(data.password, 10)
+
     const query = mysql.format('UPDATE ?? SET ? WHERE ?? = ?', 
                       [this.#table, data, compared.by, compared.value])
                       
-    this.#conn.execute(query,[this.#table, data, compared.key, compared.value],
-      (err, result) => {
+    this.#conn.execute( query , (err, result) => {
         if (err) throw err
         callback(result.changedRows)
       }
@@ -77,11 +97,10 @@ class Database {
    * @param {Function} callback 
    */
   deleteData(compared, callback) {
-    this.#conn.execute(
-      `
-      DELETE FROM ?? WHERE ?? = ?
-      `, [this.#table, compared.key, compared.value],
-      (err, result) => {
+    const query = mysql.format('DELETE FROM ?? WHERE ??',
+                      [this.#table, compared.by, compared.value])
+
+    this.#conn.execute( query , (err, result) => {
         if (err) throw err
         callback(result.changedRows)
       }
